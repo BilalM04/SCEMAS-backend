@@ -20,7 +20,7 @@ def create_sensors_blueprint(
     @auth_required(["admin", "operator"])
     def get_sensor_data():
         """Get all sensor data (Admin & Operator)"""
-        return sensor_service.get_all()
+        pass
 
 
     @blp.route("/aggregated")
@@ -38,8 +38,7 @@ def create_sensors_blueprint(
         - start_time
         - end_time
         """
-        data = sensor_service.get_aggregated(**args)
-        return {"data": data}
+        pass
 
 
     @blp.route("/filter")
@@ -57,7 +56,7 @@ def create_sensors_blueprint(
         - start_time
         - end_time
         """
-        return sensor_service.get_filtered(**args)
+        pass
 
 
     return blp
