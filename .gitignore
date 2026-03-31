@@ -1,0 +1,69 @@
+# Environment variables
+
+.env
+.env.*
+*.env
+
+# Python cache / compiled files
+
+**pycache**/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+
+venv/
+env/
+ENV/
+.venv/
+
+# Testing / coverage
+
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+
+# Logs
+
+*.log
+
+# Database files (common local DBs)
+
+*.sqlite3
+*.db
+
+# Build / distribution
+
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# IDE / Editor files
+
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Flask stuff
+
+instance/
+.webassets-cache
+
+# Secrets / keys
+
+*.pem
+*.key
+
+# Misc
+
+*.bak
+*.tmp
+
+auth.py
+test.py
+set_role.py
+firebase-service-account.json
