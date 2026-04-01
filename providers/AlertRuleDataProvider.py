@@ -14,6 +14,10 @@ class AlertRuleDataProvider:
     def get_all_alert_rules(self) -> List[AlertRuleData]:
         docs = self.collection.stream()
         return [self._from_doc(doc) for doc in docs]
+    
+    def get_rule_by_id(self, rule_id: str) -> AlertRuleData:
+        doc = self.collection.document(rule_id).get()
+        return self._from_doc(doc)
 
     def save_alert_rule(self, rule: AlertRuleData) -> str:
         data = self._to_dict(rule)

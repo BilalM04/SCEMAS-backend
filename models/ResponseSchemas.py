@@ -39,16 +39,35 @@ class CoordinateSchema(Schema):
 
 
 class AlertSchema(Schema):
-    id = fields.Str(required=True, metadata={"description": "Alert ID"})
-    status = fields.Str(
+    alert_id = fields.Str(
         required=True,
-        validate=OneOf(enum_values(AlertStatus)),
-        metadata={"description": "Alert status"}
+        metadata={"description": "Alert ID"}
+    )
+    rule_id = fields.Str(
+        required=True,
+        metadata={"description": "Rule ID"}
+    )
+    sensor_id = fields.Str(
+        required=True,
+        metadata={"description": "Sensor ID"}
+    )
+    rule_name = fields.Str(
+        required=True,
+        metadata={"description": "Rule name"}
+    )
+    time = fields.Int(
+        required=True,
+        metadata={"description": "Timestamp"}
     )
     severity = fields.Str(
         required=True,
         validate=OneOf(enum_values(AlertSeverity)),
         metadata={"description": "Alert severity"}
+    )
+    status = fields.Str(
+        required=True,
+        validate=OneOf(enum_values(AlertStatus)),
+        metadata={"description": "Alert status"}
     )
 
 
@@ -139,6 +158,16 @@ class SensorDataSchema(Schema):
         }
     )
 
+    country = fields.Str(
+        required=True,
+        metadata={"description": "Country"}
+    )
+
+    city = fields.Str(
+        required=True,
+        metadata={"description": "City"}
+    )
+
 
 class AggregatedDataSchema(Schema):
     mean = fields.Float(required=True)
@@ -180,4 +209,23 @@ class ChangeRoleSchema(Schema):
             "description": "User role",
             "enum": enum_values(AccountRole)
         }
+    )
+
+
+class SubscriptionSchema(Schema):
+    subscription_id = fields.Str(
+        required=True,
+        metadata={"description": "Subscription ID"}
+    )
+    subscriber_id = fields.Str(
+        required=True,
+        metadata={"description": "Subscriber (user) ID"}
+    )
+    rule_id = fields.Str(
+        required=True,
+        metadata={"description": "Rule ID"}
+    )
+    rule_name = fields.Str(
+        required=True,
+        metadata={"description": "Rule name"}
     )

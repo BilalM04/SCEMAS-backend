@@ -23,6 +23,14 @@ def create_sensors_blueprint(
         pass
 
 
+    @blp.route("/<sensor_id>")
+    @blp.response(200, SensorDataSchema)
+    @auth_required(["admin", "operator"])
+    def get_sensor_data_by_id(sensor_id: str):
+        """Get sensor data by id (Admin & Operator)"""
+        pass
+
+
     @blp.route("/aggregated")
     @blp.arguments(SensorFilterSchema, location="query")
     @blp.response(200, AggregatedResponseSchema)

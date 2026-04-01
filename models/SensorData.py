@@ -10,3 +10,5 @@ class SensorData:
     time: int
     location: Coordinate
     sensor_type: SensorType
+    country: str
+    city: str

@@ -13,6 +13,10 @@ class SensorDataProvider:
     def get_all_sensor_data(self) -> List[SensorData]:
         docs = self.collection.stream()
         return [self._from_doc(doc) for doc in docs]
+    
+    def get_alert_by_id(self, sensor_id: str) -> SensorData:
+        doc = self.collection.document(sensor_id).get()
+        return self._from_doc(doc)
 
     def save_sensor_data(self, sensor: SensorData) -> str:
         data = self._to_dict(sensor)
@@ -44,5 +48,7 @@ class SensorDataProvider:
             unit=data.get("unit"),
             time=data.get("time"),
             location=Coordinate(**data.get("location")),
-            sensor_type=SensorType(data.get("sensor_type"))
+            sensor_type=SensorType(data.get("sensor_type")),
+            country=data.get("country"),
+            city=data.get("city")
         )

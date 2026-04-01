@@ -34,5 +34,6 @@ class SubscriptionDataProvider:
         return Subscription(
             subscription_id=doc.id,
             subscriber_id=data.get("subscriber_id"),
-            rule_id=data.get("rule_id")
+            rule_id=data.get("rule_id"),
+            rule_name=data.get("rule_name")
         )

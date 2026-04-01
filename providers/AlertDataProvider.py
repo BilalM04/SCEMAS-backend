@@ -4,6 +4,7 @@ from typing import List
 from models.AlertInformation import AlertInformation
 from models.AlertSeverity import AlertSeverity
 from models.AlertStatus import AlertStatus
+from models.SensorType import SensorType
 
 class AlertDataProvider:
     def __init__(self, db):
@@ -13,6 +14,10 @@ class AlertDataProvider:
     def get_all_alerts(self) -> List[AlertInformation]:
         docs = self.collection.stream()
         return [self._from_doc(doc) for doc in docs]
+    
+    def get_alert_by_id(self, alert_id: str) -> AlertInformation:
+        doc = self.collection.document(alert_id).get()
+        return self._from_doc(doc)
 
     def save_alert(self, alert: AlertInformation) -> str:
         data = self._to_dict(alert)
@@ -46,6 +51,9 @@ class AlertDataProvider:
         if isinstance(alert.status, AlertStatus):
             data["status"] = alert.status.value
 
+        if isinstance(alert.sensor_type, SensorType):
+            data["sensor_type"] = alert.sensor_type.value
+
         data.pop("alert_id", None)
 
         return data
@@ -56,7 +64,12 @@ class AlertDataProvider:
         return AlertInformation(
             alert_id=doc.id,
             rule_id=data.get("rule_id"),
+            sensor_id=data.get("sensor_id"),
+            rule_name=data.get("rule_name"),
             time=data.get("time"),
             severity=AlertSeverity(data.get("severity")),
-            status=AlertStatus(data.get("status"))
+            status=AlertStatus(data.get("status")),
+            sensor_type=SensorType(data.get("sensor_type")),
+            country=data.get("country"),
+            city=data.get("city")
         )
