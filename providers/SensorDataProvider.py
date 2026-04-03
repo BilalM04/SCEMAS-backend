@@ -14,7 +14,7 @@ class SensorDataProvider:
         docs = self.collection.stream()
         return [self._from_doc(doc) for doc in docs]
     
-    def get_alert_by_id(self, sensor_id: str) -> SensorData:
+    def get_sensor_data_by_id(self, sensor_id: str) -> SensorData:
         doc = self.collection.document(sensor_id).get()
         return self._from_doc(doc)
 
