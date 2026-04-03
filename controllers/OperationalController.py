@@ -1,7 +1,7 @@
 from flask_smorest import Blueprint
 from models.ResponseSchemas import LogSchema, SystemHealthSchema
 from services.OperationalService import OperationalService
-from utils.firebase import auth_required
+from utils.Firebase import auth_required
 
 def create_operational_blueprint(operational_service: OperationalService):
     blp = Blueprint(

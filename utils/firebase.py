@@ -16,13 +16,13 @@ def auth_required(roles=None):
             try:
                 decoded = auth.verify_id_token(token)
                 request.user = decoded
-            except:
+            except Exception:
                 return {"message": "Invalid token"}, 401
 
-            if roles:
-                user_role = decoded.get("role")
-                if user_role not in roles:
-                    return {"message": "Forbidden"}, 403
+            user_role = decoded.get("role", "public")
+
+            if roles and user_role not in roles:
+                return {"message": "Forbidden"}, 403
 
             return f(*args, **kwargs)
 

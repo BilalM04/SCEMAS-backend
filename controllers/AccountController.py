@@ -2,7 +2,7 @@ from flask_smorest import Blueprint
 from models.ResponseSchemas import AccountSchema, ChangeRoleSchema, SuccessResponseSchema
 from services.AccountService import AccountService
 from services.OperationalService import OperationalService
-from utils.firebase import auth_required
+from utils.Firebase import auth_required
 
 def create_accounts_blueprint(
     account_service: AccountService,
@@ -20,6 +20,20 @@ def create_accounts_blueprint(
     @auth_required(["admin"])
     def get_accounts():
         """Get all user accounts (Admin only)"""
+        pass
+
+    @blp.route("/role")
+    @blp.response(200, AccountSchema)
+    @auth_required(["admin", "operator", "public"])
+    def get_account():
+        """Get autheticated user's role (Admin, Operator, & Public)"""
+        pass
+
+    @blp.route("/initialize", methods=["PUT"])
+    @blp.response(200, AccountSchema)
+    @auth_required(["admin", "operator", "public"])
+    def initialize_role():
+        """Initialize autheticated user's role to public (Admin, Operator, & Public)"""
         pass
     
     @blp.route("/update", methods=["PUT"])

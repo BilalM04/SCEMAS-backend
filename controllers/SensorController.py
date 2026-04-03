@@ -2,7 +2,7 @@ from flask_smorest import Blueprint
 from models.ResponseSchemas import AggregatedResponseSchema, SensorDataSchema, SensorFilterSchema
 from services.OperationalService import OperationalService
 from services.SensorService import SensorService
-from utils.firebase import auth_required
+from utils.Firebase import auth_required
 
 def create_sensors_blueprint(
     sensor_service: SensorService,

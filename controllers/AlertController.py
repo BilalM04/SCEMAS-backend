@@ -2,7 +2,7 @@ from flask_smorest import Blueprint
 from models.ResponseSchemas import AlertRuleSchema, AlertSchema, CreateAlertRuleSchema, SubscriptionSchema, SuccessResponseSchema, UpdateAlertSchema
 from services.AlertService import AlertService
 from services.OperationalService import OperationalService
-from utils.firebase import auth_required
+from utils.Firebase import auth_required
 
 def create_alerts_blueprint(
     alert_service: AlertService,
