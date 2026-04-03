@@ -6,3 +6,4 @@ class LogInformation:
     user_id: str
     log_message: str
     time: int
+    email: str

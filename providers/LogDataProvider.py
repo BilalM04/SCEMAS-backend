@@ -19,7 +19,8 @@ class LogDataProvider:
                 log_id=doc.id,
                 user_id=data.get("user_id"),
                 log_message=data.get("log_message"),
-                time=data.get("time")
+                time=data.get("time"),
+                email=data.get("email")
             )
             logs.append(log)
 
