@@ -52,10 +52,10 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 4. Configure firebase
+### 4. Configure environment
 
-- Add your Firebase service account file: `firebase-service-account.json`
-- Place it in the root directory of the project
+- Create a `.env` file in the root directory following `.env.example`
+- Fill in all Firebase secrets (project ID, private key, client email, etc.)
 
 ### 5. Run the application
 

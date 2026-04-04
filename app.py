@@ -1,3 +1,5 @@
+import os
+
 import firebase_admin
 from firebase_admin import credentials, firestore
 from flask import Flask
@@ -16,6 +18,9 @@ from services.OperationalService import OperationalService
 from services.AccountService import AccountService
 from services.AlertService import AlertService
 from services.SensorService import SensorService
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def create_app():
     app = Flask(__name__)
@@ -49,7 +54,7 @@ def create_app():
         "## Authentication Guide (Firebase Bearer Token)\n\n"
         "This API uses Firebase Authentication with JWT Bearer tokens.\n\n"
         "### Firebase Config\n\n"
-        "**Public API Key:** `AIzaSyC_TkdChDZ7ipH3rTZN4B4-R8P2ewoWavE`\n\n"
+        f"**Public API Key:** `{os.environ["FIREBASE_PUBLIC_API_KEY"]}`\n\n"
         "### 1. Get a Bearer Token\n\n"
         "Send a **POST** request to Firebase Auth:\n\n"
         "```\n\n"
@@ -78,7 +83,21 @@ def create_app():
 
     # Firebase config
     if not firebase_admin._apps:
-        cred = credentials.Certificate("firebase-service-account.json")
+        cred_dict = {
+            "type": os.environ["FIREBASE_TYPE"],
+            "project_id": os.environ["FIREBASE_PROJECT_ID"],
+            "private_key_id": os.environ["FIREBASE_PRIVATE_KEY_ID"],
+            "private_key": os.environ["FIREBASE_PRIVATE_KEY"],
+            "client_email": os.environ["FIREBASE_CLIENT_EMAIL"],
+            "client_id": os.environ["FIREBASE_CLIENT_ID"],
+            "auth_uri": os.environ["FIREBASE_AUTH_URI"],
+            "token_uri": os.environ["FIREBASE_TOKEN_URI"],
+            "auth_provider_x509_cert_url": os.environ["FIREBASE_AUTH_PROVIDER_X509_CERT_URL"],
+            "client_x509_cert_url": os.environ["FIREBASE_CLIENT_X509_CERT_URL"],
+            "universe_domain": os.environ["FIREBASE_UNIVERSE_DOMAIN"]
+        }
+
+        cred = credentials.Certificate(cred_dict)
         firebase_admin.initialize_app(cred)
 
     db = firestore.client()
