@@ -66,3 +66,4 @@ auth.py
 test.py
 set_role.py
 firebase-service-account.json
+.vercel
