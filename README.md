@@ -2,6 +2,8 @@
 
 SCEMAS (Smart City Environmental Monitoring & Alert System) is a backend service built with Flask to support environmental data monitoring, alert generation, and operational insights for smart city infrastructure.
 
+**Deployed app:** <https://scemas-backend.vercel.app/api>
+
 This repository contains the backend API, which handles:
 
 - Sensor data management
