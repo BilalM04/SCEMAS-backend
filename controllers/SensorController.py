@@ -22,7 +22,8 @@ def create_sensors_blueprint(
     @auth_required(["admin", "operator"])
     def get_sensor_data():
         """Get all sensor data (Admin & Operator)"""
-        pass
+        return sensor_service.get_all_sensor_data()
+
 
 
     @blp.route("/<sensor_id>")
