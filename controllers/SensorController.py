@@ -3,6 +3,7 @@ from models.ResponseSchemas import AggregatedResponseSchema, SensorDataSchema, S
 from services.OperationalService import OperationalService
 from services.SensorService import SensorService
 from utils.Firebase import auth_required
+from utils.Limiter import limiter
 
 def create_sensors_blueprint(
     sensor_service: SensorService,
@@ -16,6 +17,7 @@ def create_sensors_blueprint(
     )
 
     @blp.route("/")
+    @limiter.limit("60 per minute")
     @blp.response(200, SensorDataSchema(many=True))
     @auth_required(["admin", "operator"])
     def get_sensor_data():
@@ -24,6 +26,7 @@ def create_sensors_blueprint(
 
 
     @blp.route("/<sensor_id>")
+    @limiter.limit("60 per minute")
     @blp.response(200, SensorDataSchema)
     @auth_required(["admin", "operator"])
     def get_sensor_data_by_id(sensor_id: str):
@@ -32,6 +35,7 @@ def create_sensors_blueprint(
 
 
     @blp.route("/aggregated")
+    @limiter.limit("60 per minute")
     @blp.arguments(SensorFilterSchema, location="query")
     @blp.response(200, AggregatedResponseSchema)
     @auth_required(["admin", "operator", "public"])
@@ -50,6 +54,7 @@ def create_sensors_blueprint(
 
 
     @blp.route("/filter")
+    @limiter.limit("60 per minute")
     @blp.arguments(SensorFilterSchema, location="query")
     @blp.response(200, SensorDataSchema(many=True))
     @auth_required(["admin", "operator"])

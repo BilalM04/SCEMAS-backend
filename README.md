@@ -58,6 +58,7 @@ pip install -r requirements.txt
 
 - Create a `.env` file in the root directory following `.env.example`
 - Fill in all Firebase secrets (project ID, private key, client email, etc.)
+- (Optional) Set up a Redis database for rate limiting. If you choose not to use Redis, remove the rate limit URL from the limiter initialization.
 
 ### 5. Run the application
 

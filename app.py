@@ -18,12 +18,14 @@ from services.OperationalService import OperationalService
 from services.AccountService import AccountService
 from services.AlertService import AlertService
 from services.SensorService import SensorService
+from utils.Limiter import limiter
 from dotenv import load_dotenv
 
 load_dotenv()
 
 def create_app():
     app = Flask(__name__)
+    limiter.init_app(app)
 
     # Swagger config
     app.config["API_TITLE"] = "SCEMAS API"

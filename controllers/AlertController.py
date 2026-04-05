@@ -3,6 +3,7 @@ from models.ResponseSchemas import AlertRuleSchema, AlertSchema, CreateAlertRule
 from services.AlertService import AlertService
 from services.OperationalService import OperationalService
 from utils.Firebase import auth_required
+from utils.Limiter import limiter
 
 def create_alerts_blueprint(
     alert_service: AlertService,
@@ -16,6 +17,7 @@ def create_alerts_blueprint(
     )
 
     @blp.route("/")
+    @limiter.limit("60 per minute")
     @blp.response(200, AlertSchema(many=True))
     @auth_required(["admin", "operator"])
     def get_alerts():
@@ -23,6 +25,7 @@ def create_alerts_blueprint(
         pass
 
     @blp.route("/<alert_id>")
+    @limiter.limit("60 per minute")
     @blp.response(200, AlertSchema)
     @auth_required(["admin", "operator"])
     def get_alert(alert_id: str):
@@ -31,6 +34,7 @@ def create_alerts_blueprint(
     
 
     @blp.route("/update", methods=["PUT"])
+    @limiter.limit("60 per minute")
     @blp.arguments(UpdateAlertSchema, location="query")
     @blp.response(200, SuccessResponseSchema)
     @auth_required(["admin", "operator"])
@@ -40,6 +44,7 @@ def create_alerts_blueprint(
     
 
     @blp.route("/rules/create", methods=["POST"])
+    @limiter.limit("60 per minute")
     @blp.arguments(CreateAlertRuleSchema, location="query")
     @blp.response(200, AlertRuleSchema)
     @auth_required(["admin"])
@@ -49,6 +54,7 @@ def create_alerts_blueprint(
     
 
     @blp.route("/rules/delete/<rule_id>", methods=["DELETE"])
+    @limiter.limit("60 per minute")
     @blp.response(200, SuccessResponseSchema)
     @auth_required(["admin"])
     def delete_alert_rule(rule_id):
@@ -57,6 +63,7 @@ def create_alerts_blueprint(
     
 
     @blp.route("/rules")
+    @limiter.limit("60 per minute")
     @blp.response(200, AlertRuleSchema(many=True))
     @auth_required(["admin"])
     def get_all_alert_rules():
@@ -64,6 +71,7 @@ def create_alerts_blueprint(
         pass
 
     @blp.route("/rules/<rule_id>")
+    @limiter.limit("60 per minute")
     @blp.response(200, AlertRuleSchema)
     @auth_required(["admin"])
     def get_alert_rule():
@@ -72,6 +80,7 @@ def create_alerts_blueprint(
     
 
     @blp.route("/subscribe/<rule_id>", methods=["POST"])
+    @limiter.limit("60 per minute")
     @blp.response(200, SuccessResponseSchema)
     @auth_required(["admin", "operator", "public"])
     def subscribe_to_alert(rule_id):
@@ -80,6 +89,7 @@ def create_alerts_blueprint(
 
 
     @blp.route("/unsubscribe/<rule_id>", methods=["DELETE"])
+    @limiter.limit("60 per minute")
     @blp.response(200, SuccessResponseSchema)
     @auth_required(["admin", "operator", "public"])
     def unsubscribe_from_alert(rule_id):
@@ -87,6 +97,7 @@ def create_alerts_blueprint(
         pass
 
     @blp.route("/subscriptions", methods=["GET"])
+    @limiter.limit("60 per minute")
     @blp.response(200, SubscriptionSchema(many=True))
     @auth_required(["admin", "operator", "public"])
     def get_my_subscriptions():
