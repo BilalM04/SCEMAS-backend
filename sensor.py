@@ -42,12 +42,11 @@ def generate_sensor_data(sensor_type, city, country, longitude, latitude):
        
 
     return {
-        "sensor_id": f"sensor-{random.randint(100, 999)}",
         "measurement": measurement,
         "unit": units,
         "time": int(time.time()),
         "location": {"latitude": latitude, "longitude": longitude},
-        "sensor_type": sensor_type,
+        "sensor_type": sensor_type.value,
         "country": country,
         "city": city
     }
@@ -106,7 +105,7 @@ def main():
         for city in cities:
             for sensor_type in SensorType:
                 sensor_data = generate_sensor_data(sensor_type, city["city"], city["country"], city["longitude"], city["latitude"])
-        send_sensor_data(token, sensor_data)
+                send_sensor_data(token, sensor_data)
         time.sleep(600)  # Wait for 5 minutes
 
 if __name__ == "__main__":

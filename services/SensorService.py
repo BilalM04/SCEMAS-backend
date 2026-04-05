@@ -21,10 +21,13 @@ class SensorService:
 
     def get_all_sensor_data(self) -> list[SensorData]:
         return self.sensor_provider.get_all_sensor_data()
+    
+    #temporary
+    def delete_sensor_data(self, sensor_id: str):
+        return self.sensor_provider.delete_sensor_data(sensor_id)
 
     def save_sensor_data(
         self,
-        sensor_id: str,
         measurement: float,
         unit: str,
         time: int,
@@ -35,7 +38,7 @@ class SensorService:
     )-> bool:
         try:
             sensor = SensorData(
-                sensor_id=sensor_id,
+                sensor_id="",
                 measurement=measurement,
                 unit=unit,
                 time=time,

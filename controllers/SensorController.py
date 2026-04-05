@@ -73,6 +73,20 @@ def create_sensors_blueprint(
         """
         pass
 
+    #temporary path
+    @blp.route("/delete/<sensor_id>")
+    @blp.response(200, SensorDataSchema)
+    @auth_required(["admin", "operator"])
+    def delete_sensor_data_by_id(sensor_id: str):
+        """Get sensor data by id (Testing only)"""
+        try:
+            sensor_service.delete_sensor_data(sensor_id)
+            return {"success": True}
+        except Exception as e:
+            print(f"Error occurred while ingesting sensor data: {e}")
+            return {"success": False, "error": str(e)}, 500
+        pass
+
     @blp.route("/ingest", methods=["PUT"])
     @blp.arguments(SensorDataSchema)
     @blp.response(200, SuccessResponseSchema)
@@ -80,11 +94,10 @@ def create_sensors_blueprint(
         """Ingest sensor data (Admin & Operator)"""
         try: 
             sensor_service.save_sensor_data(
-                sensor_id=args["sensor_id"],
                 measurement=args["measurement"],
                 unit=args["unit"],
                 time=args["time"],
-                location=Coordinate(lat=args["location"]["lat"], lon=args["location"]["lon"]),
+                location=Coordinate(latitude=args["location"]["latitude"], longitude=args["location"]["longitude"]),
                 sensor_type=args["sensor_type"],
                 country=args["country"],
                 city=args["city"]
