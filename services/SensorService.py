@@ -20,14 +20,32 @@ class SensorService:
         pass
 
     def get_all_sensor_data(self) -> list[SensorData]:
-        pass
+        return self.sensor_provider.get_all_sensor_data()
 
     def save_sensor_data(
         self,
+        sensor_id: str,
         measurement: float,
         unit: str,
         time: int,
         location: Coordinate,
         sensor_type: SensorType,
-    ) -> bool:
-        pass
+        country: str,
+        city: str
+    )-> bool:
+        try:
+            sensor = SensorData(
+                sensor_id=sensor_id,
+                measurement=measurement,
+                unit=unit,
+                time=time,
+                location=location,
+                sensor_type=sensor_type,
+                country=country,
+                city=city
+            )
+            self.sensor_provider.save_sensor_data(sensor)
+            return True
+        except Exception as e:
+            print(f"Error occurred while saving sensor data: {e}")
+            return False

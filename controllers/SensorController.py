@@ -1,9 +1,10 @@
 from flask_smorest import Blueprint
-from models.ResponseSchemas import AggregatedResponseSchema, SensorDataSchema, SensorFilterSchema
+from models.ResponseSchemas import AggregatedResponseSchema, SensorDataSchema, SensorFilterSchema, SuccessResponseSchema
 from services.OperationalService import OperationalService
 from services.SensorService import SensorService
 from utils.Firebase import auth_required
 from utils.Limiter import limiter
+from models.Coordinate import Coordinate
 
 def create_sensors_blueprint(
     sensor_service: SensorService,
@@ -71,6 +72,27 @@ def create_sensors_blueprint(
         - end_time
         """
         pass
+
+    @blp.route("/ingest", methods=["PUT"])
+    @blp.arguments(SensorDataSchema)
+    @blp.response(200, SuccessResponseSchema)
+    def ingest_sensor_data(args):
+        """Ingest sensor data (Admin & Operator)"""
+        try: 
+            sensor_service.save_sensor_data(
+                sensor_id=args["sensor_id"],
+                measurement=args["measurement"],
+                unit=args["unit"],
+                time=args["time"],
+                location=Coordinate(lat=args["location"]["lat"], lon=args["location"]["lon"]),
+                sensor_type=args["sensor_type"],
+                country=args["country"],
+                city=args["city"]
+            )
+            return {"success": True, "message": "Sensor data ingested successfully."}
+        except Exception as e:
+            print(f"Error occurred while ingesting sensor data: {e}")
+            return {"success": False, "error": str(e)}, 500
 
 
     return blp
