@@ -5,6 +5,7 @@ from services.SensorService import SensorService
 from utils.Firebase import auth_required
 from utils.Limiter import limiter
 from models.Coordinate import Coordinate
+from models.SensorType import SensorType
 
 def create_sensors_blueprint(
     sensor_service: SensorService,
@@ -93,12 +94,37 @@ def create_sensors_blueprint(
     def ingest_sensor_data(args):
         """Ingest sensor data (Admin & Operator)"""
         try: 
+
+            sensor_type = args["sensor_type"]
+            measurement = args["measurement"]
+            units = args["unit"]
+            if (sensor_type == SensorType.TEMPERATURE):
+                if measurement < -20 or measurement > 20:
+                    raise ValueError("Temperature measurement out of range (-20 to 20 °C)")
+                if units != "°C":
+                    raise ValueError("Invalid unit for temperature sensor. Expected '°C'.")
+            elif (sensor_type == SensorType.HUMIDITY):
+                if measurement < 0 or measurement > 100:
+                    raise ValueError("Humidity measurement out of range (0 to 100 %)")
+                if units != "%":
+                    raise ValueError("Invalid unit for humidity sensor. Expected '%'.")
+            elif (sensor_type == SensorType.AIR_QUALITY):
+                if measurement < 0 or measurement > 500:
+                    raise ValueError("Air quality measurement out of range (0 to 500 AQI)")
+                if units != "AQI":
+                    raise ValueError("Invalid unit for air quality sensor. Expected 'AQI'.")
+            elif (sensor_type == SensorType.NOISE):
+                if measurement < 30 or measurement > 120:
+                    raise ValueError("Noise measurement out of range (30 to 120 dB)")
+                if units != "dB":
+                    raise ValueError("Invalid unit for noise sensor. Expected 'dB'.")
+                
             sensor_service.save_sensor_data(
-                measurement=args["measurement"],
-                unit=args["unit"],
+                measurement=measurement,
+                unit=units,
                 time=args["time"],
                 location=Coordinate(latitude=args["location"]["latitude"], longitude=args["location"]["longitude"]),
-                sensor_type=args["sensor_type"],
+                sensor_type=sensor_type,
                 country=args["country"],
                 city=args["city"]
             )
