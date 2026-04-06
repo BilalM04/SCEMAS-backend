@@ -24,6 +24,10 @@ def create_operational_blueprint(operational_service: OperationalService):
     @blp.response(200, SystemHealthSchema)
     @auth_required(["admin", "operator"])
     def get_system_health():
+<<<<<<< HEAD
         operational_service.get_system_health()
+=======
+        return operational_service.get_system_health()
+>>>>>>> main
 
     return blp

@@ -5,3 +5,4 @@ python-dotenv==1.2.2
 Flask-Limiter==4.1.1
 redis==7.4.0
 Pyrebase4==4.9.0
+psutil==7.2.2
