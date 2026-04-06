@@ -36,7 +36,7 @@ def create_sensors_blueprint(
     @auth_required(["admin", "operator"])
     def get_sensor_data_by_id(sensor_id: str):
         """Get sensor data by id (Admin & Operator)"""
-        pass
+        return sensor_service.get_sensor_data_by_id(sensor_id)
 
 
     @blp.route("/aggregated")
@@ -127,7 +127,7 @@ def create_sensors_blueprint(
     @blp.arguments(SensorDataSchema)
     @blp.response(200, SuccessResponseSchema)
     def ingest_sensor_data(args):
-        """Ingest sensor data (Admin & Operator)"""
+        """Ingest sensor data (Sensor only)"""
         try: 
 
             sensor_type = args["sensor_type"]

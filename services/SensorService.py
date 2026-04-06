@@ -27,8 +27,6 @@ class SensorService:
         elif (len(sensors_to_aggregate) == 0):
             sensors_to_aggregate = list(SensorType)
 
-        print(f"Sensors to aggregate: {[s.value for s in sensors_to_aggregate]}")
-
         results = {}
         for sensor_type in sensors_to_aggregate:
 
@@ -43,9 +41,7 @@ class SensorService:
             if (len(query_sensor_data) == 0):
                 print(f"No data found for sensor type {sensor_type}, city {city}, country {country}, start_time {start_time}, end_time {end_time}")
                 continue
-            # print(f"Queried {len(query_sensor_data)} records for sensor type {sensor_type}, city {city}, start_time {start_time}, end_time {end_time}")
-        # if not sensor_type_data:
-        #     return results
+
             measurements = [s.measurement for s in query_sensor_data]
             
             mean = 0
@@ -61,9 +57,7 @@ class SensorService:
                 "median": median,
                 "mode": mode
             }
-            # print(ad)
             results[sensor_type] = ad
-            # print(results)
         return results
 
     def get_all_sensor_data(self) -> list[SensorData]:
@@ -108,21 +102,13 @@ class SensorService:
         start_time: Optional[int] = None,
         end_time: Optional[int] = None
     ) -> list[SensorData]:
-        
-        data_points = []
-        if sensor_type:
-            sensors_to_aggregate.append(sensor_type)
-        elif (len(sensors_to_aggregate) == 0):
-            sensors_to_aggregate = list(SensorType)
-
-        results = {}
-        for sensor_type in sensors_to_aggregate:
-
-            query_sensor_data = self.sensor_provider.query_sensor_data(
-                sensor_type=sensor_type,
-                city=city,
-                country=country,
-                start_time=start_time,
-                end_time=end_time
-            )
-        return self.sensor_provider.query_sensor_data(sensor_type, city, country, start_time, end_time)
+        return self.sensor_provider.query_sensor_data(
+            sensor_type=sensor_type,
+            city=city,
+            country=country,
+            start_time=start_time,
+            end_time=end_time
+        )
+    
+    def get_sensor_data_by_id(self, sensor_id: str) -> SensorData | None:
+        return self.sensor_provider.get_sensor_data_by_id(sensor_id)

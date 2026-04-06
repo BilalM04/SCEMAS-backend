@@ -13,9 +13,9 @@ class SensorDataProvider:
 
     def get_all_sensor_data(self) -> List[SensorData]:
         docs = self.collection.stream()
-        return [self._from_doc(doc) for doc in docs]
+        return [s for doc in docs if (s := self._from_doc(doc)) is not None]
     
-    def get_sensor_data_by_id(self, sensor_id: str) -> SensorData:
+    def get_sensor_data_by_id(self, sensor_id: str) -> SensorData | None:
         doc = self.collection.document(sensor_id).get()
         return self._from_doc(doc)
     
@@ -36,7 +36,10 @@ class SensorDataProvider:
         if country:
             query = query.where("country", "==", country)
 
-        results = [self._from_doc(doc) for doc in query.stream()]
+        results = [s for doc in query.stream() if (s := self._from_doc(doc)) is not None]
+
+        if (len(results) == 0):
+            return results
 
         if start_time is not None:
             results = [r for r in results if r.time >= start_time]
@@ -69,6 +72,9 @@ class SensorDataProvider:
 
     def _from_doc(self, doc) -> SensorData:
         data = doc.to_dict()
+
+        if data is None:
+            return None
 
         return SensorData(
             sensor_id=doc.id,
