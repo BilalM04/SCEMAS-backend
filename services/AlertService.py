@@ -14,8 +14,8 @@ from providers.SubscriptionDataProvider import SubscriptionDataProvider
 class AlertService:
     def __init__(
         self,
-        rule_provider: AlertRuleDataProvider,
-        alert_provider: AlertDataProvider,
+        alert_provider: AlertDataDataProvider,
+        rule_provider: AlertRuleProvider,
         subscription_provider: SubscriptionDataProvider,
     ):
         self.rule_provider = rule_provider

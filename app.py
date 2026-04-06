@@ -116,7 +116,7 @@ def create_app():
     account_service = AccountService(account_provider)
     alert_service = AlertService(alert_provider, alert_rule_provider, subscription_provider)
     operational_service = OperationalService(log_provider)
-    sensor_service = SensorService(sensor_provider)
+    sensor_service = SensorService(sensor_provider, alert_service)
 
     # Controllers
     AccountBlueprint = create_accounts_blueprint(account_service, operational_service)
