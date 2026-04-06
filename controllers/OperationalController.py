@@ -3,6 +3,7 @@ from models.ResponseSchemas import LogSchema, SystemHealthSchema
 from services.OperationalService import OperationalService
 from utils.Firebase import auth_required
 from utils.Limiter import limiter
+from dataclasses import asdict
 
 def create_operational_blueprint(operational_service: OperationalService):
     blp = Blueprint(
@@ -17,13 +18,14 @@ def create_operational_blueprint(operational_service: OperationalService):
     @blp.response(200, LogSchema(many=True))
     @auth_required(["admin"])
     def get_logs():
-        return operational_service.get_all_logs()
+        logs = operational_service.get_all_logs()
+        return [asdict(log) for log in logs]
     
     @blp.route("/health")
     @limiter.limit("60 per minute")
     @blp.response(200, SystemHealthSchema)
     @auth_required(["admin", "operator"])
     def get_system_health():
-        return operational_service.get_system_health()
+        return asdict(operational_service.get_system_health())
 
     return blp
