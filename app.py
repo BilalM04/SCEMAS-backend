@@ -122,7 +122,7 @@ def create_app():
     AccountBlueprint = create_accounts_blueprint(account_service, operational_service)
     OperationalBlueprint = create_operational_blueprint(operational_service)
     AlertBlueprint = create_alerts_blueprint(alert_service, operational_service)
-    SensorBlueprint = create_sensors_blueprint(sensor_service, operational_service)
+    SensorBlueprint = create_sensors_blueprint(sensor_service, operational_service, alert_service)
 
     api.register_blueprint(AlertBlueprint)
     api.register_blueprint(AccountBlueprint)

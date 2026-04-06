@@ -140,7 +140,7 @@ class SuccessResponseSchema(Schema):
 
 
 class SensorDataSchema(Schema):
-    sensor_id = fields.Str(required=True)
+    sensor_id = fields.Str(required=False)
     measurement = fields.Float(required=True)
     unit = fields.Str(required=True)
 
