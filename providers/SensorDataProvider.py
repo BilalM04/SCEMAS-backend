@@ -1,5 +1,6 @@
 from dataclasses import asdict
-from typing import List
+from typing import List, Optional
+from datetime import datetime
 
 from models.SensorData import SensorData
 from models.Coordinate import Coordinate
@@ -17,6 +18,27 @@ class SensorDataProvider:
     def get_sensor_data_by_id(self, sensor_id: str) -> SensorData:
         doc = self.collection.document(sensor_id).get()
         return self._from_doc(doc)
+    
+    def query_sensor_data(
+        self,
+        sensor_type: SensorType,
+        city: Optional[str] = None,
+        country: Optional[str] = None,
+        start_time: Optional[int] = None,
+        end_time: Optional[int] = None
+    ) -> List[SensorData]:
+        query = self.collection.stream()
+        if sensor_type:
+            query = query.where("sensor_type", "==", sensor_type.value)
+        if city:
+            query = query.where("city", "==", city)
+        if country:
+            query = query.where("country", "==", country)
+        if start_time:
+            query = query.where("time", ">=", start_time)
+        if end_time:
+            query = query.where("time", "<=", end_time)
+        return [self._from_doc(doc) for doc in query]
 
     def save_sensor_data(self, sensor: SensorData) -> str:
         data = self._to_dict(sensor)

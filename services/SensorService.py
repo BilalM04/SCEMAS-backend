@@ -1,3 +1,5 @@
+from statistics import multimode
+from typing import Optional
 from models.AggregatedData import AggregatedData
 from models.Coordinate import Coordinate
 from models.SensorData import SensorData
@@ -12,12 +14,41 @@ class SensorService:
 
     def get_aggregated_data(
         self,
-        location: Coordinate,
-        radius: float,
-        start_time: int,
-        end_time: int,
+        sensor_type: SensorType,
+        city: Optional[str] = None,
+        start_time: Optional[int] = None,
+        end_time: Optional[int] = None,
     ) -> dict[SensorType, AggregatedData]:
-        pass
+        # listToAggregate = self.sensor_provider.get_all_sensor_data()
+        # results: dict[SensorType, AggregatedData] = {}
+        # sensor_type_data = [s for s in listToAggregate
+        #     if (s.sensor_type == sensor_type)
+        #     and (city is None or s.city == city)
+        #     and (start_time is None or s.time >= start_time)
+        #     and (end_time is None or s.time <= end_time)
+        # ]
+
+        query_sensor_data = self.sensor_provider.query_sensor_data(
+            sensor_type=sensor_type,
+            city=city,
+            start_time=start_time,
+            end_time=end_time
+        )
+        print(f"Queried {len(query_sensor_data)} records for sensor type {sensor_type}, city {city}, start_time {start_time}, end_time {end_time}")
+        if not sensor_type_data:
+            return results
+        measurements = [s.measurement for s in query_sensor_data]
+        mean = sum(measurements) / len(measurements)
+        median = sorted(measurements)[len(measurements) // 2]
+        mode = multimode(measurements)
+
+        ad = AggregatedData(
+            mean=mean,
+            median=median,
+            mode=mode
+        )
+        results[sensor_type] = ad
+        return results
 
     def get_all_sensor_data(self) -> list[SensorData]:
         return self.sensor_provider.get_all_sensor_data()

@@ -44,7 +44,7 @@ def create_sensors_blueprint(
     @auth_required(["admin", "operator", "public"])
     def get_aggregated_data(args):
         """
-        Get aggregated sensor data (Admin, Operator, & Public)
+        Get aggregated sensor data (An, Operator, & Public)
 
         Optional filters:
         - country
@@ -53,7 +53,8 @@ def create_sensors_blueprint(
         - start_time
         - end_time
         """
-        pass
+        print(args["sensor_type"], args["city"], args["country"], args["start_time"], args["end_time"])
+        return sensor_service.get_aggregated_data(args["sensor_type"], args["city"], args["country"], args["start_time"], args["end_time"])
 
 
     @blp.route("/filter")
