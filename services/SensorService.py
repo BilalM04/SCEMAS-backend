@@ -14,40 +14,56 @@ class SensorService:
 
     def get_aggregated_data(
         self,
-        sensor_type: SensorType,
+        filter_sensor_type: Optional[SensorType] = None,
         city: Optional[str] = None,
+        country: Optional[str] = None,
         start_time: Optional[int] = None,
         end_time: Optional[int] = None,
     ) -> dict[SensorType, AggregatedData]:
-        # listToAggregate = self.sensor_provider.get_all_sensor_data()
-        # results: dict[SensorType, AggregatedData] = {}
-        # sensor_type_data = [s for s in listToAggregate
-        #     if (s.sensor_type == sensor_type)
-        #     and (city is None or s.city == city)
-        #     and (start_time is None or s.time >= start_time)
-        #     and (end_time is None or s.time <= end_time)
-        # ]
 
-        query_sensor_data = self.sensor_provider.query_sensor_data(
-            sensor_type=sensor_type,
-            city=city,
-            start_time=start_time,
-            end_time=end_time
-        )
-        print(f"Queried {len(query_sensor_data)} records for sensor type {sensor_type}, city {city}, start_time {start_time}, end_time {end_time}")
-        if not sensor_type_data:
-            return results
-        measurements = [s.measurement for s in query_sensor_data]
-        mean = sum(measurements) / len(measurements)
-        median = sorted(measurements)[len(measurements) // 2]
-        mode = multimode(measurements)
+        sensors_to_aggregate = []
+        if filter_sensor_type:
+            sensors_to_aggregate.append(filter_sensor_type)
+        elif (len(sensors_to_aggregate) == 0):
+            sensors_to_aggregate = list(SensorType)
 
-        ad = AggregatedData(
-            mean=mean,
-            median=median,
-            mode=mode
-        )
-        results[sensor_type] = ad
+        print(f"Sensors to aggregate: {[s.value for s in sensors_to_aggregate]}")
+
+        results = {}
+        for sensor_type in sensors_to_aggregate:
+
+            query_sensor_data = self.sensor_provider.query_sensor_data(
+                sensor_type=sensor_type,
+                city=city,
+                country=country,
+                start_time=start_time,
+                end_time=end_time
+            )
+
+            if (len(query_sensor_data) == 0):
+                print(f"No data found for sensor type {sensor_type}, city {city}, country {country}, start_time {start_time}, end_time {end_time}")
+                continue
+            # print(f"Queried {len(query_sensor_data)} records for sensor type {sensor_type}, city {city}, start_time {start_time}, end_time {end_time}")
+        # if not sensor_type_data:
+        #     return results
+            measurements = [s.measurement for s in query_sensor_data]
+            
+            mean = 0
+            median = 0
+            mode = 0
+            if len(measurements) != 0:
+                mean = sum(measurements) / len(measurements)
+                median = sorted(measurements)[len(measurements) // 2]
+                mode = multimode(measurements)[0]
+
+            ad = {
+                "mean": mean,
+                "median": median,
+                "mode": mode
+            }
+            # print(ad)
+            results[sensor_type] = ad
+            # print(results)
         return results
 
     def get_all_sensor_data(self) -> list[SensorData]:

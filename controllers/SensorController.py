@@ -53,8 +53,24 @@ def create_sensors_blueprint(
         - start_time
         - end_time
         """
-        print(args["sensor_type"], args["city"], args["country"], args["start_time"], args["end_time"])
-        return sensor_service.get_aggregated_data(args["sensor_type"], args["city"], args["country"], args["start_time"], args["end_time"])
+        sensor_type = None
+        country = None
+        city = None  
+        start_time = None
+        end_time = None
+        if "sensor_type" in args:
+            sensor_type = SensorType(args["sensor_type"])
+        if "country" in args:
+            country = args["country"]
+        if "city" in args:
+            city = args["city"]
+        if "start_time" in args:
+            start_time = args["start_time"]
+        if "end_time" in args:
+            end_time = args["end_time"]
+        
+        print(f"Received request for aggregated data with filters - sensor_type: {sensor_type}, city: {city}, country: {country}, start_time: {start_time}, end_time: {end_time}")
+        return {"data" : sensor_service.get_aggregated_data(sensor_type, city, country, start_time, end_time)}
 
 
     @blp.route("/filter")

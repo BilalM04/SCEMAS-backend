@@ -27,18 +27,24 @@ class SensorDataProvider:
         start_time: Optional[int] = None,
         end_time: Optional[int] = None
     ) -> List[SensorData]:
-        query = self.collection.stream()
+        query = self.collection
+        print(f"Querying sensor data with filters - sensor_type: {sensor_type.value}, city: {city}, country: {country}, start_time: {start_time}, end_time: {end_time}")
         if sensor_type:
             query = query.where("sensor_type", "==", sensor_type.value)
         if city:
             query = query.where("city", "==", city)
         if country:
             query = query.where("country", "==", country)
-        if start_time:
-            query = query.where("time", ">=", start_time)
-        if end_time:
-            query = query.where("time", "<=", end_time)
-        return [self._from_doc(doc) for doc in query]
+
+        results = [self._from_doc(doc) for doc in query.stream()]
+
+        if start_time is not None:
+            results = [r for r in results if r.time >= start_time]
+
+        if end_time is not None:
+            results = [r for r in results if r.time <= end_time]
+        
+        return results
 
     def save_sensor_data(self, sensor: SensorData) -> str:
         data = self._to_dict(sensor)
