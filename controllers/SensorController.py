@@ -1,5 +1,5 @@
 from flask_smorest import Blueprint
-from models.ResponseSchemas import AggregatedResponseSchema, SensorDataSchema, SensorFilterSchema, SuccessResponseSchema
+from models.ResponseSchemas import AggregatedResponseSchema, SensorDataSchema, SensorFilterSchema, SuccessResponseSchema, SensorPredictionSchema
 from services.OperationalService import OperationalService
 from services.SensorService import SensorService
 from utils.Firebase import auth_required
@@ -72,6 +72,10 @@ def create_sensors_blueprint(
             start_time = args["start_time"]
         if "end_time" in args:
             end_time = args["end_time"]
+
+        message = f"{sensor_type.value} sensor at requested aggregated data with filters - city: {city}, country: {country}, start_time: {start_time}, end_time: {end_time}"
+        operational_service.log_event(user_id="Sensor", message=message)
+
         
         print(f"Received request for aggregated data with filters - sensor_type: {sensor_type}, city: {city}, country: {country}, start_time: {start_time}, end_time: {end_time}")
         raw = sensor_service.get_aggregated_data(sensor_type, city, country, start_time, end_time)
@@ -172,6 +176,7 @@ def create_sensors_blueprint(
                 city=args["city"]
             )
 
+
             # alert_service.evaluate_sensor_data(
             #     sensor_id, 
             #     sensor_type, 
@@ -181,10 +186,60 @@ def create_sensors_blueprint(
             #     country, 
             #     city, 
             # )
+
             return {"success": True, "message": "Sensor data ingested successfully."}
         except Exception as e:
             print(f"Error occurred while ingesting sensor data: {e}")
             return {"success": False, "error": str(e)}, 500
 
+
+    @blp.route("/predict")
+    @blp.arguments(SensorPredictionSchema, location="query")
+    @blp.response(200, AggregatedResponseSchema)
+    @auth_required(["admin", "operator", "public"])
+    def predict_sensor_data(args):
+        """
+        Predict sensor data for the next 30 days
+        Optional filters:
+        - country
+        - city
+        - sensor_type
+        """
+        country = args["country"]
+        city = args["city"]
+        sensor_type = args["sensor_type"]
+
+        # getting filtered sensor data based no the location and enviromental metric that was asked for. 
+        past_data = sensor_service.get_filtered_sensor_data(
+            sensor_type=SensorType(sensor_type),
+            city=city,
+            country=country
+        )
+
+        # Sort by time descending
+        past_data = sorted(past_data, key=lambda s: s.time, reverse=True)
+
+        # If there is not enough data to make a prediction, return empty response
+        if len(past_data) < 5: 
+            return {"data": {}}
+
+        # Predict the next 30 days based on average of last 5 measurements with random variation
+        last_5 = past_data[:5]
+        avg_measurement = sum(s.measurement for s in last_5) / 5
+
+        # Generate 30 predicted values with a minor variation around average to simulate realistic weather patterns
+        predictions = []
+        for _ in range(30):
+            variation = random.uniform(-0.1 * avg_measurement, 0.1 * avg_measurement)  # ±10% variation
+            predictions.append(round(avg_measurement + variation, 2))
+
+        return {
+            "data": {
+                sensor_type: {
+                    "predictions": predictions,
+                    "average_of_last_5": round(avg_measurement, 2)
+                }
+            }
+        }
 
     return blp

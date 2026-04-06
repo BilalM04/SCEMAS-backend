@@ -231,3 +231,13 @@ class SubscriptionSchema(Schema):
         required=True,
         metadata={"description": "Rule name"}
     )
+
+
+class SensorPredictionSchema(Schema):
+    country = fields.Str(required=True, metadata={"description": "Country"})
+    city = fields.Str(required=True, metadata={"description": "City"})
+    sensor_type = fields.Str(
+        required=True,
+        validate=OneOf([e.value for e in SensorType]),
+        metadata={"description": "Type of sensor"}
+    )

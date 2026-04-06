@@ -106,7 +106,7 @@ def main():
             for sensor_type in SensorType:
                 sensor_data = generate_sensor_data(sensor_type, city["city"], city["country"], city["longitude"], city["latitude"])
                 send_sensor_data(token, sensor_data)
-        time.sleep(600)  # Wait for 5 minutes
+        time.sleep(15)  # Wait for 5 minutes
 
 if __name__ == "__main__":
     main()
