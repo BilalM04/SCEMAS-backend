@@ -1,5 +1,6 @@
 from flask_smorest import Blueprint
 from models.ResponseSchemas import AccountSchema, ChangeRoleSchema, SuccessResponseSchema
+from models.AccountRole import AccountRole
 from services.AccountService import AccountService
 from services.OperationalService import OperationalService
 from utils.Firebase import auth_required
@@ -22,7 +23,7 @@ def create_accounts_blueprint(
     @auth_required(["admin"])
     def get_accounts():
         """Get all user accounts (Admin only)"""
-        pass
+        return account_service.get_all_accounts()
 
     @blp.route("/role")
     @limiter.limit("60 per minute")
@@ -45,9 +46,14 @@ def create_accounts_blueprint(
     @blp.arguments(ChangeRoleSchema, location="query")
     @blp.response(200, SuccessResponseSchema)
     @auth_required(["admin"])
-    
     def change_role(user_id: str, role: str):
         """Change user role (Admin only)"""
-        pass
+        try:
+            result = account_service.change_role(user_id, AccountRole(role))
+            if result: return {"success": result, "message": "User role changed successfuly"}
+            else: return {"success": result, "message": "Error ocurred while changing user's role"}, 500
+        except Exception as e:
+            print(f"Error ocurred while changing user's role")
+            return {"success": False, "error": str(e)}, 500
 
     return blp
