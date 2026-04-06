@@ -6,10 +6,12 @@ from utils.Firebase import auth_required
 from utils.Limiter import limiter
 from models.Coordinate import Coordinate
 from models.SensorType import SensorType
+from services.AlertService import AlertService
 
 def create_sensors_blueprint(
     sensor_service: SensorService,
-    operational_service: OperationalService
+    operational_service: OperationalService,
+    alert_service: AlertService
 ):
     blp = Blueprint(
         "sensors",
@@ -145,6 +147,16 @@ def create_sensors_blueprint(
                 country=args["country"],
                 city=args["city"]
             )
+
+            # alert_service.evaluate_sensor_data(
+            #     sensor_id, 
+            #     sensor_type, 
+            #     measurement, 
+            #     location, 
+            #     timestamp, 
+            #     country, 
+            #     city, 
+            # )
             return {"success": True, "message": "Sensor data ingested successfully."}
         except Exception as e:
             print(f"Error occurred while ingesting sensor data: {e}")
