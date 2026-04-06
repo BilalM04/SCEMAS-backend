@@ -1,3 +1,5 @@
+from statistics import multimode
+from typing import Optional
 from models.AggregatedData import AggregatedData
 from models.Coordinate import Coordinate
 from models.SensorData import SensorData
@@ -12,15 +14,58 @@ class SensorService:
 
     def get_aggregated_data(
         self,
-        location: Coordinate,
-        radius: float,
-        start_time: int,
-        end_time: int,
+        filter_sensor_type: Optional[SensorType] = None,
+        city: Optional[str] = None,
+        country: Optional[str] = None,
+        start_time: Optional[int] = None,
+        end_time: Optional[int] = None,
     ) -> dict[SensorType, AggregatedData]:
-        pass
+
+        sensors_to_aggregate = []
+        if filter_sensor_type:
+            sensors_to_aggregate.append(filter_sensor_type)
+        elif (len(sensors_to_aggregate) == 0):
+            sensors_to_aggregate = list(SensorType)
+
+        results = {}
+        for sensor_type in sensors_to_aggregate:
+
+            query_sensor_data = self.sensor_provider.query_sensor_data(
+                sensor_type=sensor_type,
+                city=city,
+                country=country,
+                start_time=start_time,
+                end_time=end_time
+            )
+
+            if (len(query_sensor_data) == 0):
+                print(f"No data found for sensor type {sensor_type}, city {city}, country {country}, start_time {start_time}, end_time {end_time}")
+                continue
+
+            measurements = [s.measurement for s in query_sensor_data]
+            
+            mean = 0
+            median = 0
+            mode = 0
+            if len(measurements) != 0:
+                mean = sum(measurements) / len(measurements)
+                median = sorted(measurements)[len(measurements) // 2]
+                mode = multimode(measurements)[0]
+
+            ad = {
+                "mean": mean,
+                "median": median,
+                "mode": mode
+            }
+            results[sensor_type] = ad
+        return results
 
     def get_all_sensor_data(self) -> list[SensorData]:
-        pass
+        return self.sensor_provider.get_all_sensor_data()
+    
+    #temporary
+    def delete_sensor_data(self, sensor_id: str):
+        return self.sensor_provider.delete_sensor_data(sensor_id)
 
     def save_sensor_data(
         self,
@@ -29,5 +74,41 @@ class SensorService:
         time: int,
         location: Coordinate,
         sensor_type: SensorType,
-    ) -> bool:
-        pass
+        country: str,
+        city: str
+    )-> bool:
+        try:
+            sensor = SensorData(
+                sensor_id="",
+                measurement=measurement,
+                unit=unit,
+                time=time,
+                location=location,
+                sensor_type=sensor_type,
+                country=country,
+                city=city
+            )
+            self.sensor_provider.save_sensor_data(sensor)
+            return True
+        except Exception as e:
+            print(f"Error occurred while saving sensor data: {e}")
+            return False
+        
+    def get_filtered_sensor_data(
+        self,
+        sensor_type: Optional[SensorType] = None,
+        city: Optional[str] = None,
+        country: Optional[str] = None,
+        start_time: Optional[int] = None,
+        end_time: Optional[int] = None
+    ) -> list[SensorData]:
+        return self.sensor_provider.query_sensor_data(
+            sensor_type=sensor_type,
+            city=city,
+            country=country,
+            start_time=start_time,
+            end_time=end_time
+        )
+    
+    def get_sensor_data_by_id(self, sensor_id: str) -> SensorData | None:
+        return self.sensor_provider.get_sensor_data_by_id(sensor_id)
