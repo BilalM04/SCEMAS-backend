@@ -91,7 +91,23 @@ def create_sensors_blueprint(
         - start_time
         - end_time
         """
-        pass
+        sensor_type = None
+        country = None
+        city = None  
+        start_time = None
+        end_time = None
+        if "sensor_type" in args:
+            sensor_type = SensorType(args["sensor_type"])
+        if "country" in args:
+            country = args["country"]
+        if "city" in args:
+            city = args["city"]
+        if "start_time" in args:
+            start_time = args["start_time"]
+        if "end_time" in args:
+            end_time = args["end_time"]
+        
+        return sensor_service.get_filtered_sensor_data(sensor_type, city, country, start_time, end_time)
 
     #temporary path
     @blp.route("/delete/<sensor_id>")

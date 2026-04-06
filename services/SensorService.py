@@ -99,3 +99,30 @@ class SensorService:
         except Exception as e:
             print(f"Error occurred while saving sensor data: {e}")
             return False
+        
+    def get_filtered_sensor_data(
+        self,
+        sensor_type: Optional[SensorType] = None,
+        city: Optional[str] = None,
+        country: Optional[str] = None,
+        start_time: Optional[int] = None,
+        end_time: Optional[int] = None
+    ) -> list[SensorData]:
+        
+        data_points = []
+        if sensor_type:
+            sensors_to_aggregate.append(sensor_type)
+        elif (len(sensors_to_aggregate) == 0):
+            sensors_to_aggregate = list(SensorType)
+
+        results = {}
+        for sensor_type in sensors_to_aggregate:
+
+            query_sensor_data = self.sensor_provider.query_sensor_data(
+                sensor_type=sensor_type,
+                city=city,
+                country=country,
+                start_time=start_time,
+                end_time=end_time
+            )
+        return self.sensor_provider.query_sensor_data(sensor_type, city, country, start_time, end_time)
