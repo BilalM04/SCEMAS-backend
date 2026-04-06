@@ -24,7 +24,7 @@ class LogSchema(Schema):
     log_id = fields.Str(required=True, metadata={"description": "ID of log data"})
     user_id = fields.Str(required=True, metadata={"description": "ID of the user who triggered the operation"})
     email = fields.Str(required=True, metadata={"description": "Email of the user who triggered the operation"})
-    message = fields.Str(required=True, metadata={"description": "Log message"})
+    log_message = fields.Str(required=True, metadata={"description": "Log message"})
     time = fields.Int(required=True, metadata={"description": "Timestamp of the operation (epoch time)"})
 
 
