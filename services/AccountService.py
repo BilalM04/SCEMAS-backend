@@ -7,10 +7,10 @@ class AccountService:
         self.account_provider = account_provider
 
     def get_account(self, user_id: str) -> UserInformation:
-        pass
+        return self.account_provider.get_user(user_id)
 
     def get_all_accounts(self) -> list[UserInformation]:
-        pass
+        return self.account_provider.get_all_users()
 
     def change_role(self, user_id: str, role: AccountRole) -> bool:
-        pass
+        return self.account_provider.update_user_role(user_id, role)
