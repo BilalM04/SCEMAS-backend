@@ -26,7 +26,7 @@ def create_accounts_blueprint(
     def get_accounts():
         """Get all user accounts (Admin only)"""
         accounts = account_service.get_all_accounts()
-        return [asdict(account) for account in accounts]
+        return [account.to_dict() for account in accounts]
 
     @blp.route("/role")
     @limiter.limit("60 per minute")
@@ -65,12 +65,35 @@ def create_accounts_blueprint(
         """Change user role (Admin only)"""
         user_id = args.get("user_id")
         role = args.get("role")
+
+        user = request.user
+        request_user_id = user.get("uid")
+        requset_user_email = user.get("email")
+
         try:
             result = account_service.change_role(user_id, AccountRole(role))
-            if result: return {"success": result, "message": "User role changed successfuly"}
-            else: return {"success": result, "message": "Error ocurred while changing user's role"}, 500
+
+            if result:
+                operational_service.log_event(
+                    user_id=request_user_id,
+                    message=f"Changed role of {user_id} to {role}",
+                    email=requset_user_email
+                )
+                return {"success": True, "message": "User role changed successfully"}
+
+            else:
+                operational_service.log_event(
+                    user_id=request_user_id,
+                    message=f"Failed to change role of {user_id} to {role}",
+                    email=requset_user_email
+                )
+                return {
+                    "success": False,
+                    "message": "Error occurred while changing user's role"
+                }, 500
+
         except Exception as e:
-            print(f"Error ocurred while changing user's role")
+            print("Error occurred while changing user's role")
             return {"success": False, "error": str(e)}, 500
 
     return blp
