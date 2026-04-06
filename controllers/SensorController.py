@@ -27,6 +27,8 @@ def create_sensors_blueprint(
     def get_sensor_data():
         """Get all sensor data (Admin & Operator)"""
         data = sensor_service.get_all_sensor_data()
+        message = f"All sensor data was requested"
+        operational_service.log_event(user_id="Sensor", message=message)
         return [d.to_dict() for d in data]
 
 
@@ -38,6 +40,8 @@ def create_sensors_blueprint(
     def get_sensor_data_by_id(sensor_id: str):
         """Get sensor data by id (Admin & Operator)"""
         data = sensor_service.get_sensor_data_by_id(sensor_id)
+        message = f" Sensor data with id: {sensor_id.value} was requested by id"
+        operational_service.log_event(user_id="Sensor", message=message)
         return data.to_dict()
 
 
@@ -73,7 +77,9 @@ def create_sensors_blueprint(
         if "end_time" in args:
             end_time = args["end_time"]
 
-        message = f"{sensor_type.value} sensor at requested aggregated data with filters - city: {city}, country: {country}, start_time: {start_time}, end_time: {end_time}"
+        if sensor_type.value is None:
+            sensor_type_value = "All"
+        message = f"{sensor_type.value} sensor(s) requested aggregated data with filters - city: {city}, country: {country}, start_time: {start_time}, end_time: {end_time}"
         operational_service.log_event(user_id="Sensor", message=message)
 
         
@@ -119,6 +125,11 @@ def create_sensors_blueprint(
             end_time = args["end_time"]
         
         data = sensor_service.get_filtered_sensor_data(sensor_type, city, country, start_time, end_time)
+        if sensor_type.value is None:
+            sensor_type_value = "All"
+        message = f"{sensor_type.value} sensor(s) requested filtered data with filters - city: {city}, country: {country}, start_time: {start_time}, end_time: {end_time}"
+        operational_service.log_event(user_id="Sensor", message=message)
+
         return [d.to_dict() for d in data]
 
     #temporary path
