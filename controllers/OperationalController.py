@@ -17,15 +17,13 @@ def create_operational_blueprint(operational_service: OperationalService):
     @blp.response(200, LogSchema(many=True))
     @auth_required(["admin"])
     def get_logs():
-        """Get system logs (Admin only)"""
-        pass
+        return operational_service.get_all_logs()
     
     @blp.route("/health")
     @limiter.limit("60 per minute")
     @blp.response(200, SystemHealthSchema)
     @auth_required(["admin", "operator"])
     def get_system_health():
-        """Get system health metrics (Admin & Operator)"""
-        pass
+        operational_service.get_system_health()
 
     return blp
