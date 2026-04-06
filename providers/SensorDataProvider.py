@@ -31,15 +31,28 @@ class SensorDataProvider:
         print(f"Querying sensor data with filters - sensor_type: {sensor_type.value}, city: {city}, country: {country}, start_time: {start_time}, end_time: {end_time}")
         if sensor_type:
             query = query.where("sensor_type", "==", sensor_type.value)
-        if city:
-            query = query.where("city", "==", city)
-        if country:
-            query = query.where("country", "==", country)
 
-        results = [s for doc in query.stream() if (s := self._from_doc(doc)) is not None]
+        results = [
+            s for doc in query.stream()
+            if (s := self._from_doc(doc)) is not None
+        ]
 
-        if (len(results) == 0):
+        if not results:
             return results
+
+        if city:
+            city_lower = city.lower()
+            results = [
+                r for r in results
+                if r.city and r.city.lower() == city_lower
+            ]
+
+        if country:
+            country_lower = country.lower()
+            results = [
+                r for r in results
+                if r.country and r.country.lower() == country_lower
+            ]
 
         if start_time is not None:
             results = [r for r in results if r.time >= start_time]
