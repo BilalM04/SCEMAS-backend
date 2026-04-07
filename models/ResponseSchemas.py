@@ -61,6 +61,11 @@ class AlertSchema(Schema):
         required=True,
         metadata={"description": "Timestamp"}
     )
+    sensor_type = fields.Str(
+        required=True,
+        validate=OneOf(enum_values(SensorType)),
+        metadata={"description": "Sensor type"}
+    )
     severity = fields.Str(
         required=True,
         validate=OneOf(enum_values(AlertSeverity)),
@@ -70,6 +75,14 @@ class AlertSchema(Schema):
         required=True,
         validate=OneOf(enum_values(AlertStatus)),
         metadata={"description": "Alert status"}
+    )
+    country = fields.Str(
+        required=True,
+        metadata={"description": "Country"}
+    )
+    city = fields.Str(
+        required=True,
+        metadata={"description": "City"}
     )
 
 
@@ -127,7 +140,8 @@ class CreateAlertRuleSchema(Schema):
         required=True,
         validate=OneOf(enum_values(ComparisonOperator))
     )
-    location = fields.Nested(CoordinateSchema, required=True)
+    latitude = fields.Float(required=True)
+    longitude = fields.Float(required=True)
     radius = fields.Float(required=True)
     sensor_type = fields.Str(
         required=True,

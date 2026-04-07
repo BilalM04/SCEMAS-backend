@@ -1,4 +1,3 @@
-# controllers/AlertController.py  (replace the stub bodies)
 from flask import request
 from flask_smorest import Blueprint, abort
 from models.AlertSeverity import AlertSeverity
@@ -20,8 +19,7 @@ def create_alerts_blueprint(
     alert_service: AlertService,
     operational_service: OperationalService,
 ):
-    blp = Blueprint("alerts", "alerts", url_prefix="/alerts",
-                    description="Alert endpoints")
+    blp = Blueprint("alerts", "alerts", url_prefix="/alerts", description="Alert endpoints")
 
     @blp.route("/")
     @limiter.limit("60 per minute")
@@ -29,7 +27,9 @@ def create_alerts_blueprint(
     @auth_required(["admin", "operator"])
     def get_alerts():
         """Get all alerts (Admin & Operator)"""
-        return alert_service.get_all_alerts()
+        alerts = alert_service.get_all_alerts()
+        print(alerts)
+        return [alert.to_dict() for alert in alerts]
 
     @blp.route("/<alert_id>")
     @limiter.limit("60 per minute")
@@ -40,7 +40,7 @@ def create_alerts_blueprint(
         alert = alert_service.get_alert_by_id(alert_id)
         if not alert:
             abort(404, message="Alert not found")
-        return alert
+        return alert.to_dict()
 
     @blp.route("/update", methods=["PUT"])
     @limiter.limit("60 per minute")
@@ -50,16 +50,19 @@ def create_alerts_blueprint(
     def update_alert(data):
         """Update alert status and severity (Admin & Operator)"""
         user = request.user
+
         success = alert_service.update_alert(
             alert_id=data["alert_id"],
             alert_severity=AlertSeverity(data["alert_severity"]),
             alert_status=AlertStatus(data["alert_status"]),
         )
-        operational_service.log(
-            user_id=user["uid"],
-            email=user.get("email", ""),
-            message=f"Updated alert {data['alert_id']} → {data['alert_status']}",
-        )
+
+        if (success):
+            operational_service.log_event(
+                user_id=user["uid"],
+                email=user.get("email", ""),
+                message=f"Updated alert {data['alert_id']} → {data['alert_status']}",
+            )
         return {"success": success}
 
     @blp.route("/rules/create", methods=["POST"])
@@ -71,8 +74,8 @@ def create_alerts_blueprint(
         """Create a new alert rule (Admin only)"""
         user = request.user
         location = Coordinate(
-            longitude=data["location"]["longitude"],
-            latitude=data["location"]["latitude"],
+            longitude=data["longitude"],
+            latitude=data["latitude"],
         )
         rule = alert_service.create_alert_rule(
             author_id=user["uid"],
@@ -83,12 +86,12 @@ def create_alerts_blueprint(
             operator=ComparisonOperator(data["operator"]),
             sensor_type=SensorType(data["sensor_type"]),
         )
-        operational_service.log(
+        operational_service.log_event(
             user_id=user["uid"],
             email=user.get("email", ""),
             message=f"Created alert rule '{rule.name}' (id: {rule.rule_id})",
         )
-        return rule
+        return rule.to_dict()
 
     @blp.route("/rules/delete/<rule_id>", methods=["DELETE"])
     @limiter.limit("60 per minute")
@@ -98,7 +101,7 @@ def create_alerts_blueprint(
         """Delete an alert rule (Admin only)"""
         user = request.user
         success = alert_service.delete_alert_rule(rule_id)
-        operational_service.log(
+        operational_service.log_event(
             user_id=user["uid"],
             email=user.get("email", ""),
             message=f"Deleted alert rule {rule_id}",
@@ -111,7 +114,8 @@ def create_alerts_blueprint(
     @auth_required(["admin"])
     def get_all_alert_rules():
         """Get all alert rules (Admin only)"""
-        return alert_service.get_all_alert_rules()
+        rules = alert_service.get_all_alert_rules()
+        return [rule.to_dict() for rule in rules]
 
     @blp.route("/rules/<rule_id>")
     @limiter.limit("60 per minute")
@@ -122,7 +126,7 @@ def create_alerts_blueprint(
         rule = alert_service.get_alert_rule_by_id(rule_id)
         if not rule:
             abort(404, message="Alert rule not found")
-        return rule
+        return rule.to_dict()
 
     @blp.route("/subscribe/<rule_id>", methods=["POST"])
     @limiter.limit("60 per minute")
@@ -141,7 +145,7 @@ def create_alerts_blueprint(
     def unsubscribe_from_alert(rule_id):
         """Unsubscribe from an alert rule"""
         user_id = request.user["uid"]
-        success = alert_service.unsubscribe_from_alert(rule_id, user_id)
+        success = alert_service.unsubscribe_from_alert(user_id, rule_id)
         return {"success": success}
 
     @blp.route("/subscriptions", methods=["GET"])
