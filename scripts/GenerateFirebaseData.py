@@ -37,16 +37,16 @@ db = firestore.client()
 # ------------------------
 
 USERS = [
-    ("L3idfDJyDeXnS8yW9XCvDOOnxGB2", "user0@email.com"),
-    ("kWZBdIKY0YdjdpjZTdQPT2JXtoz1", "user1@email.com"),
-    ("s5tutpgYpRfzoDKJnRpIvF2A6WB3", "user2@email.com"),
-    ("5XVKHjSNtIPJnAojVf5Un9kyHml2", "user3@email.com"),
-    ("mK8rbl1frnTvdBv3jtctzJoUUlB2", "user4@email.com"),
-    ("JRkgcSKomfRSiV9isZLQ8zkcmGF3", "user5@email.com"),
-    ("4Uvt9JpyDgbsrqCLlRcZj8uQEZI2", "user6@email.com"),
-    ("gcV0IgbaNDeLMMaEEwmib40n9523", "user7@email.com"),
-    ("EBAJIfoNjKQZ5vOscmUKGoLmfCJ3", "user8@email.com"),
-    ("6CqLWrZzjEhlyn6sof1jEUif5Bz1", "user9@email.com"),
+    ("OhbQwcer3SZ24X17W44naw0NEwh2", "user0@example.com"),
+    ("RQyPt5AxGUSZCeEkBVQWs2mOyUf2", "user1@example.com"),
+    ("Cv3m1Rj8J7hYnRFrw4Dz5zP7epP2", "user2@example.com"),
+    ("e2nVuFT6SVatXgrzU3RIpVeVJ1h2", "user3@example.com"),
+    ("rMYVkVyllZbCg0GgBfBn6Wn1Gwt1", "user4@example.com"),
+    ("wMQLALkDhXRVzklX0mvj4Q8eWEj2", "user5@example.com"),
+    ("hyEuX7YD6ZhF79wfNQXzphBjZ8p1", "user6@example.com"),
+    ("F1CGuj8Rw1aIJmL8KEop9jC205m1", "user7@example.com"),
+    ("jG942RqyMvcnKvTzwSyg4btI1OU2", "user8@example.com"),
+    ("htnNPWJ3e0PkZfG4ZW3H4Dqc6zJ2", "user9@example.com"),
 ]
 
 CITIES = {
