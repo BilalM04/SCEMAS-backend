@@ -1,3 +1,6 @@
+import math
+import time
+
 from models.AlertInformation import AlertInformation
 from models.AlertRuleData import AlertRuleData
 from models.AlertSeverity import AlertSeverity
@@ -7,6 +10,7 @@ from models.Coordinate import Coordinate
 from models.SensorType import SensorType
 from models.Subscription import Subscription
 
+from models.Subscription import Subscription
 from providers.AlertDataProvider import AlertDataProvider
 from providers.AlertRuleDataProvider import AlertRuleDataProvider
 from providers.SubscriptionDataProvider import SubscriptionDataProvider
@@ -15,8 +19,8 @@ from providers.SubscriptionDataProvider import SubscriptionDataProvider
 class AlertService:
     def __init__(
         self,
-        rule_provider: AlertRuleDataProvider,
         alert_provider: AlertDataProvider,
+        rule_provider: AlertRuleDataProvider,
         subscription_provider: SubscriptionDataProvider,
     ):
         self.rule_provider = rule_provider
@@ -26,6 +30,7 @@ class AlertService:
     def create_alert_rule(
         self,
         author_id: str,
+        name: str,
         threshold: float,
         location: Coordinate,
         radius: float,
@@ -35,7 +40,7 @@ class AlertService:
         now = int(time.time())
         rule = AlertRuleData(
             rule_id = "",
-            author_id="",
+            author_id=author_id,
             name=name,
             threshold = threshold,
             operator = operator, 
@@ -52,14 +57,18 @@ class AlertService:
     def delete_alert_rule(self, rule_id: str) -> bool:
         self.rule_provider.delete_alert_rule(rule_id)
         return True
+    
     def get_all_alert_rules(self) -> list[AlertRuleData]:
         return self.rule_provider.get_all_alert_rules()
 
     def get_all_alerts(self) -> list[AlertInformation]:
-        return self.rule_provider.get_all_alert_rules()
+        return self.alert_provider.get_all_alerts()
 
     def get_alert_rule_by_id(self, rule_id: str) -> AlertRuleData:
         return self.rule_provider.get_rule_by_id(rule_id)
+    
+    def get_alert_by_id(self, alert_id: str) -> AlertRuleData:
+        return self.alert_provider.get_alert_by_id(alert_id)
 
     def update_alert(
         self,
@@ -84,12 +93,14 @@ class AlertService:
         self.subscription_provider.save_subscription(sub)
         return True
 
-    def unsubscribe_from_alert(self, subscription_id: str) -> bool:
-        subs = self.subscription_provider.get_all_subscriptions()
-        for sub in subs:
-            if sub.subscriber_id == user_id and sub.rule_id == rule_id:
+    def unsubscribe_from_alert(self, user_id: str, alert_id: str) -> bool:
+        subscriptions = self.subscription_provider.get_all_subscriptions()
+
+        for sub in subscriptions:
+            if sub.subscriber_id == user_id and sub.rule_id == alert_id:
                 self.subscription_provider.delete_subscription(sub.subscription_id)
                 return True
+
         return False
     
     def get_subscriptions_for_user(self, user_id: str) -> list[Subscription]:
@@ -115,6 +126,7 @@ class AlertService:
                 continue
             if rule.evaluate(measurement):
                 self._fire_alert(rule, sensor_id, timestamp, country, city)
+    
     def _within_radius(
         self,
         sensor_loc: Coordinate,
@@ -143,9 +155,12 @@ class AlertService:
             rule_name=rule.name,
             time=timestamp,
             sensor_type=rule.sensor_type,
-            severity=AlertSeverity.LOW,      # default; operators can escalate
+            severity=AlertSeverity.LOW,
             status=AlertStatus.ACTIVE,
             country=country,
             city=city,
         )
+
         self.alert_provider.save_alert(alert)
+
+        # TODO: Add sending email notifications

@@ -29,3 +29,20 @@ class AlertRuleData:
             return value != self.threshold
         else:
             raise ValueError(f"Unsupported operator: {self.operator}")
+        
+    def to_dict(self) -> dict:
+        return {
+            "rule_id": self.rule_id,
+            "author_id": self.author_id,
+            "name": self.name,
+            "threshold": self.threshold,
+            "operator": self.operator.value,
+            "location": {
+                "longitude": self.location.longitude,
+                "latitude": self.location.latitude,
+            },
+            "radius": self.radius,
+            "sensor_type": self.sensor_type.value,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
+        }
