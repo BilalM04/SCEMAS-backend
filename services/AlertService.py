@@ -5,6 +5,7 @@ from models.AlertStatus import AlertStatus
 from models.ComparisonOperator import ComparisonOperator
 from models.Coordinate import Coordinate
 from models.SensorType import SensorType
+from models.Subscription import Subscription
 
 from providers.AlertDataProvider import AlertDataProvider
 from providers.AlertRuleDataProvider import AlertRuleDataProvider

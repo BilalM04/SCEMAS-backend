@@ -28,7 +28,7 @@ class SensorDataProvider:
         end_time: Optional[int] = None
     ) -> List[SensorData]:
         query = self.collection
-        print(f"Querying sensor data with filters - sensor_type: {sensor_type.value}, city: {city}, country: {country}, start_time: {start_time}, end_time: {end_time}")
+        print(f"Querying sensor data with filters - sensor_type: {sensor_type}, city: {city}, country: {country}, start_time: {start_time}, end_time: {end_time}")
         if sensor_type:
             query = query.where("sensor_type", "==", sensor_type.value)
 
