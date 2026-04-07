@@ -120,7 +120,7 @@ def create_sensors_blueprint(
         data = sensor_service.get_filtered_sensor_data(sensor_type, city, country, start_time, end_time)
         return [d.to_dict() for d in data]
 
-    @blp.route("/ingest", methods=["PUT"])
+    @blp.route("/ingest", methods=["POST"])
     @blp.arguments(SensorDataSchema)
     @blp.response(200, SuccessResponseSchema)
     def ingest_sensor_data(args):
