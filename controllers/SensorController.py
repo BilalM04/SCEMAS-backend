@@ -182,10 +182,11 @@ def create_sensors_blueprint(
     @blp.route("/predict")
     @blp.arguments(SensorPredictionSchema, location="query")
     @blp.response(200, PredictionResponseSchema)
-    @auth_required(["admin", "operator", "public"])
+    @auth_required(["admin", "operator"])
     def predict_sensor_data(args):
         """
-        Predict sensor data for the next 30 days
+        Predict sensor data for the next 30 days (Admin & Operator)
+
         Optional filters:
         - country
         - city
