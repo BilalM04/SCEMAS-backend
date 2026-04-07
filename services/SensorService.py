@@ -76,7 +76,7 @@ class SensorService:
         sensor_type: SensorType,
         country: str,
         city: str
-    )-> bool:
+    )-> SensorData:
         try:
             sensor = SensorData(
                 sensor_id="",
@@ -88,11 +88,11 @@ class SensorService:
                 country=country,
                 city=city
             )
-            self.sensor_provider.save_sensor_data(sensor)
-            return True
+            sensor.sensor_id = self.sensor_provider.save_sensor_data(sensor)
+            return sensor
         except Exception as e:
             print(f"Error occurred while saving sensor data: {e}")
-            return False
+            return None
         
     def get_filtered_sensor_data(
         self,

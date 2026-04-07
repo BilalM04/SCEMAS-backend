@@ -1,4 +1,6 @@
+from dataclasses import asdict
 import random
+from flask import request
 from flask_smorest import Blueprint
 from models.ResponseSchemas import AggregatedResponseSchema, SensorDataSchema, SensorFilterSchema, SuccessResponseSchema, SensorPredictionSchema, PredictionResponseSchema
 from services.OperationalService import OperationalService
@@ -28,8 +30,6 @@ def create_sensors_blueprint(
     def get_sensor_data():
         """Get all sensor data (Admin & Operator)"""
         data = sensor_service.get_all_sensor_data()
-        message = f"All sensor data was requested"
-        operational_service.log_event(user_id="Sensor", message=message, email="")
         return [d.to_dict() for d in data]
 
 
@@ -41,8 +41,6 @@ def create_sensors_blueprint(
     def get_sensor_data_by_id(sensor_id: str):
         """Get sensor data by id (Admin & Operator)"""
         data = sensor_service.get_sensor_data_by_id(sensor_id)
-        message = f" Sensor data with id: {sensor_id.value} was requested by id"
-        operational_service.log_event(user_id="Sensor", message=message, email="")
         return data.to_dict()
 
 
@@ -77,12 +75,6 @@ def create_sensors_blueprint(
             start_time = args["start_time"]
         if "end_time" in args:
             end_time = args["end_time"]
-
-        if sensor_type is None:
-            sensor_type_value = "All"
-        message = f"{sensor_type} sensor(s) requested aggregated data with filters - city: {city}, country: {country}, start_time: {start_time}, end_time: {end_time}"
-        operational_service.log_event(user_id="Sensor", message=message, email="")
-
         
         print(f"Received request for aggregated data with filters - sensor_type: {sensor_type}, city: {city}, country: {country}, start_time: {start_time}, end_time: {end_time}")
         raw = sensor_service.get_aggregated_data(sensor_type, city, country, start_time, end_time)
@@ -126,26 +118,7 @@ def create_sensors_blueprint(
             end_time = args["end_time"]
         
         data = sensor_service.get_filtered_sensor_data(sensor_type, city, country, start_time, end_time)
-        if sensor_type is None:
-            sensor_type_value = "All"
-        message = f"{sensor_type} sensor(s) requested filtered data with filters - city: {city}, country: {country}, start_time: {start_time}, end_time: {end_time}"
-        operational_service.log_event(user_id="Sensor", message=message, email="")
-
         return [d.to_dict() for d in data]
-
-    #temporary path
-    @blp.route("/delete/<sensor_id>")
-    @blp.response(200, SensorDataSchema)
-    @auth_required(["admin", "operator"])
-    def delete_sensor_data_by_id(sensor_id: str):
-        """Get sensor data by id (Testing only)"""
-        try:
-            sensor_service.delete_sensor_data(sensor_id)
-            return {"success": True}
-        except Exception as e:
-            print(f"Error occurred while ingesting sensor data: {e}")
-            return {"success": False, "error": str(e)}, 500
-        pass
 
     @blp.route("/ingest", methods=["PUT"])
     @blp.arguments(SensorDataSchema)
@@ -153,7 +126,7 @@ def create_sensors_blueprint(
     def ingest_sensor_data(args):
         """Ingest sensor data (Sensor only)"""
         try: 
-
+            user = request.user
             sensor_type = args["sensor_type"]
             measurement = args["measurement"]
             units = args["unit"]
@@ -178,7 +151,7 @@ def create_sensors_blueprint(
                 if units != "dB":
                     raise ValueError("Invalid unit for noise sensor. Expected 'dB'.")
                 
-            sensor_service.save_sensor_data(
+            sensor = sensor_service.save_sensor_data(
                 measurement=measurement,
                 unit=units,
                 time=args["time"],
@@ -188,16 +161,17 @@ def create_sensors_blueprint(
                 city=args["city"]
             )
 
+            operational_service.log_event(user["uid"], f"Ingesting {sensor_type} sensor data from {asdict(sensor.location)}", user.get("email", ""))
 
-            # alert_service.evaluate_sensor_data(
-            #     sensor_id, 
-            #     sensor_type, 
-            #     measurement, 
-            #     location, 
-            #     timestamp, 
-            #     country, 
-            #     city, 
-            # )
+            alert_service.evaluate_sensor_data(
+                sensor.sensor_id, 
+                sensor.sensor_type, 
+                sensor.measurement, 
+                sensor.location, 
+                sensor.timestamp, 
+                sensor.country, 
+                sensor.city, 
+            )
 
             return {"success": True, "message": "Sensor data ingested successfully."}
         except Exception as e:
