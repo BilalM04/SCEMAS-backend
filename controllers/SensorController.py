@@ -39,7 +39,7 @@ def create_sensors_blueprint(
     @blp.response(200, SensorDataSchema)
     @auth_required(["admin", "operator"])
     def get_sensor_data_by_id(sensor_id: str):
-        """Get sensor data by id (Admin & Operator)"""
+        """Get sensor data by ID (Admin & Operator)"""
         data = sensor_service.get_sensor_data_by_id(sensor_id)
         return data.to_dict()
 
@@ -51,7 +51,7 @@ def create_sensors_blueprint(
     @auth_required(["admin", "operator", "public"])
     def get_aggregated_data(args):
         """
-        Get aggregated sensor data (An, Operator, & Public)
+        Get aggregated sensor data (Admin, Operator, & Public)
 
         Optional filters:
         - country

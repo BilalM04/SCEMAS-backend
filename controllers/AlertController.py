@@ -143,7 +143,7 @@ def create_alerts_blueprint(
     @blp.response(200, SuccessResponseSchema)
     @auth_required(["admin"])
     def delete_alert_rule(rule_id):
-        """Delete an alert rule (Admin only)"""
+        """Delete an alert rule (Admin Only)"""
         user = request.user
 
         try:
@@ -166,8 +166,9 @@ def create_alerts_blueprint(
     @blp.route("/rules")
     @limiter.limit("60 per minute")
     @blp.response(200, AlertRuleSchema(many=True))
-    @auth_required(["admin"])
+    @auth_required(["admin", "operator", "public"])
     def get_all_alert_rules():
+        """Get all alert rules (Admin, Operator, & Public)"""
         try:
             rules = alert_service.get_all_alert_rules()
             return [rule.to_dict() for rule in rules]
@@ -177,8 +178,9 @@ def create_alerts_blueprint(
     @blp.route("/rules/<rule_id>")
     @limiter.limit("60 per minute")
     @blp.response(200, AlertRuleSchema)
-    @auth_required(["admin"])
+    @auth_required(["admin", "operator", "public"])
     def get_alert_rule(rule_id):
+        """Get alert rule by ID (Admin, Operator, & Public)"""
         try:
             rule = alert_service.get_alert_rule_by_id(rule_id)
             if not rule:
