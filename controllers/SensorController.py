@@ -1,5 +1,6 @@
+import random
 from flask_smorest import Blueprint
-from models.ResponseSchemas import AggregatedResponseSchema, SensorDataSchema, SensorFilterSchema, SuccessResponseSchema, SensorPredictionSchema
+from models.ResponseSchemas import AggregatedResponseSchema, SensorDataSchema, SensorFilterSchema, SuccessResponseSchema, SensorPredictionSchema, PredictionResponseSchema
 from services.OperationalService import OperationalService
 from services.SensorService import SensorService
 from utils.Firebase import auth_required
@@ -28,7 +29,7 @@ def create_sensors_blueprint(
         """Get all sensor data (Admin & Operator)"""
         data = sensor_service.get_all_sensor_data()
         message = f"All sensor data was requested"
-        operational_service.log_event(user_id="Sensor", message=message)
+        operational_service.log_event(user_id="Sensor", message=message, email="")
         return [d.to_dict() for d in data]
 
 
@@ -41,7 +42,7 @@ def create_sensors_blueprint(
         """Get sensor data by id (Admin & Operator)"""
         data = sensor_service.get_sensor_data_by_id(sensor_id)
         message = f" Sensor data with id: {sensor_id.value} was requested by id"
-        operational_service.log_event(user_id="Sensor", message=message)
+        operational_service.log_event(user_id="Sensor", message=message, email="")
         return data.to_dict()
 
 
@@ -80,7 +81,7 @@ def create_sensors_blueprint(
         if sensor_type.value is None:
             sensor_type_value = "All"
         message = f"{sensor_type.value} sensor(s) requested aggregated data with filters - city: {city}, country: {country}, start_time: {start_time}, end_time: {end_time}"
-        operational_service.log_event(user_id="Sensor", message=message)
+        operational_service.log_event(user_id="Sensor", message=message, email="")
 
         
         print(f"Received request for aggregated data with filters - sensor_type: {sensor_type}, city: {city}, country: {country}, start_time: {start_time}, end_time: {end_time}")
@@ -128,7 +129,7 @@ def create_sensors_blueprint(
         if sensor_type.value is None:
             sensor_type_value = "All"
         message = f"{sensor_type.value} sensor(s) requested filtered data with filters - city: {city}, country: {country}, start_time: {start_time}, end_time: {end_time}"
-        operational_service.log_event(user_id="Sensor", message=message)
+        operational_service.log_event(user_id="Sensor", message=message, email="")
 
         return [d.to_dict() for d in data]
 
@@ -206,7 +207,7 @@ def create_sensors_blueprint(
 
     @blp.route("/predict")
     @blp.arguments(SensorPredictionSchema, location="query")
-    @blp.response(200, AggregatedResponseSchema)
+    @blp.response(200, PredictionResponseSchema)
     @auth_required(["admin", "operator", "public"])
     def predict_sensor_data(args):
         """
@@ -232,7 +233,13 @@ def create_sensors_blueprint(
 
         # If there is not enough data to make a prediction, return empty response
         if len(past_data) < 5: 
-            return {"data": {}}
+            return {
+                "sensor_type": sensor_type,
+                "country": country,
+                "city": city,
+                "predictions": [],
+                "average_of_last_5": None
+            }
 
         # Predict the next 30 days based on average of last 5 measurements with random variation
         last_5 = past_data[:5]
@@ -244,13 +251,14 @@ def create_sensors_blueprint(
             variation = random.uniform(-0.1 * avg_measurement, 0.1 * avg_measurement)  # ±10% variation
             predictions.append(round(avg_measurement + variation, 2))
 
+
         return {
-            "data": {
-                sensor_type: {
-                    "predictions": predictions,
-                    "average_of_last_5": round(avg_measurement, 2)
-                }
-            }
+            "sensor_type": sensor_type,
+            "country": country,
+            "city": city,
+            "predictions": predictions,
+            "average_of_last_5": round(avg_measurement, 2)
         }
+
 
     return blp

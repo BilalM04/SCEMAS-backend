@@ -232,6 +232,30 @@ class SubscriptionSchema(Schema):
         metadata={"description": "Rule name"}
     )
 
+class PredictionResponseSchema(Schema):
+
+    sensor_type = fields.Str(
+        required=True,
+        validate=OneOf(enum_values(SensorType)),
+        metadata={"description": "Type of sensor"}
+    )
+    country = fields.Str(
+        required=True, metadata={"description": "Country"}
+    )
+    city = fields.Str(
+        required=True, metadata={"description": "City"}
+    )
+    predictions = fields.List(
+        fields.Float(),
+        required=True,
+        metadata={"description": "List of 30 predicted values"}
+    )
+
+    average_of_last_5 = fields.Float(
+        required=True,
+        metadata={"description": "Average of last 5 measurements"}
+    )
+
 
 class SensorPredictionSchema(Schema):
     country = fields.Str(required=True, metadata={"description": "Country"})
