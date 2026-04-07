@@ -120,65 +120,6 @@ def create_sensors_blueprint(
         data = sensor_service.get_filtered_sensor_data(sensor_type, city, country, start_time, end_time)
         return [d.to_dict() for d in data]
 
-    @blp.route("/ingest", methods=["PUT"])
-    @blp.arguments(SensorDataSchema)
-    @blp.response(200, SuccessResponseSchema)
-    def ingest_sensor_data(args):
-        """Ingest sensor data (Sensor only)"""
-        try: 
-            user = request.user
-            sensor_type = args["sensor_type"]
-            measurement = args["measurement"]
-            units = args["unit"]
-            if (sensor_type == SensorType.TEMPERATURE):
-                if measurement < -20 or measurement > 20:
-                    raise ValueError("Temperature measurement out of range (-20 to 20 °C)")
-                if units != "°C":
-                    raise ValueError("Invalid unit for temperature sensor. Expected '°C'.")
-            elif (sensor_type == SensorType.HUMIDITY):
-                if measurement < 0 or measurement > 100:
-                    raise ValueError("Humidity measurement out of range (0 to 100 %)")
-                if units != "%":
-                    raise ValueError("Invalid unit for humidity sensor. Expected '%'.")
-            elif (sensor_type == SensorType.AIR_QUALITY):
-                if measurement < 0 or measurement > 500:
-                    raise ValueError("Air quality measurement out of range (0 to 500 AQI)")
-                if units != "AQI":
-                    raise ValueError("Invalid unit for air quality sensor. Expected 'AQI'.")
-            elif (sensor_type == SensorType.NOISE):
-                if measurement < 30 or measurement > 120:
-                    raise ValueError("Noise measurement out of range (30 to 120 dB)")
-                if units != "dB":
-                    raise ValueError("Invalid unit for noise sensor. Expected 'dB'.")
-                
-            sensor = sensor_service.save_sensor_data(
-                measurement=measurement,
-                unit=units,
-                time=args["time"],
-                location=Coordinate(latitude=args["location"]["latitude"], longitude=args["location"]["longitude"]),
-                sensor_type=sensor_type,
-                country=args["country"],
-                city=args["city"]
-            )
-
-            operational_service.log_event(user["uid"], f"Ingesting {sensor_type} sensor data from {asdict(sensor.location)}", user.get("email", ""))
-
-            alert_service.evaluate_sensor_data(
-                sensor.sensor_id, 
-                sensor.sensor_type, 
-                sensor.measurement, 
-                sensor.location, 
-                sensor.timestamp, 
-                sensor.country, 
-                sensor.city, 
-            )
-
-            return {"success": True, "message": "Sensor data ingested successfully."}
-        except Exception as e:
-            print(f"Error occurred while ingesting sensor data: {e}")
-            return {"success": False, "error": str(e)}, 500
-
-
     @blp.route("/predict")
     @blp.arguments(SensorPredictionSchema, location="query")
     @blp.response(200, PredictionResponseSchema)
@@ -236,3 +177,58 @@ def create_sensors_blueprint(
 
 
     return blp
+
+def ingest_sensor_data(
+    sensor_service: SensorService,
+    operational_service: OperationalService,
+    alert_service: AlertService,
+    args: dict
+):
+    try:
+        sensor_type = SensorType(args["sensor_type"])
+        measurement = args["measurement"]
+        units = args["unit"]
+        if (sensor_type == SensorType.TEMPERATURE):
+            if measurement < -20 or measurement > 20:
+                raise ValueError("Temperature measurement out of range (-20 to 20 °C)")
+            if units != "°C":
+                raise ValueError("Invalid unit for temperature sensor. Expected '°C'.")
+        elif (sensor_type == SensorType.HUMIDITY):
+            if measurement < 0 or measurement > 100:
+                raise ValueError("Humidity measurement out of range (0 to 100 %)")
+            if units != "%":
+                raise ValueError("Invalid unit for humidity sensor. Expected '%'.")
+        elif (sensor_type == SensorType.AIR_QUALITY):
+            if measurement < 0 or measurement > 500:
+                raise ValueError("Air quality measurement out of range (0 to 500 AQI)")
+            if units != "AQI":
+                raise ValueError("Invalid unit for air quality sensor. Expected 'AQI'.")
+        elif (sensor_type == SensorType.NOISE):
+            if measurement < 30 or measurement > 120:
+                raise ValueError("Noise measurement out of range (30 to 120 dB)")
+            if units != "dB":
+                raise ValueError("Invalid unit for noise sensor. Expected 'dB'.")
+            
+        sensor_service.save_sensor_data(
+            measurement=measurement,
+            unit=units,
+            time=args["time"],
+            location=Coordinate(latitude=args["location"]["latitude"], longitude=args["location"]["longitude"]),
+            sensor_type=sensor_type,
+            country=args["country"],
+            city=args["city"]
+        )
+
+        # alert_service.evaluate_sensor_data(
+        #     sensor_id, 
+        #     sensor_type, 
+        #     measurement, 
+        #     location, 
+        #     timestamp, 
+        #     country, 
+        #     city, 
+        # )
+        return {"success": True, "message": "Sensor data ingested successfully."}
+    except Exception as e:
+        print(f"Error occurred while ingesting sensor data: {e}")
+        return {"success": False, "error": str(e)}, 500

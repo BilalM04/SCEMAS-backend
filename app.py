@@ -1,4 +1,5 @@
 import os
+import threading
 
 import firebase_admin
 from firebase_admin import credentials, firestore
@@ -8,6 +9,7 @@ from controllers.AccountController import create_accounts_blueprint
 from controllers.AlertController import create_alerts_blueprint
 from controllers.OperationalController import create_operational_blueprint
 from controllers.SensorController import create_sensors_blueprint
+from controllers.MQTTConsumer import MQTTConsumer
 from providers.AlertDataProvider import AlertDataProvider
 from providers.AlertRuleDataProvider import AlertRuleDataProvider
 from providers.LogDataProvider import LogDataProvider
@@ -128,6 +130,9 @@ def create_app():
     api.register_blueprint(AccountBlueprint)
     api.register_blueprint(OperationalBlueprint)
     api.register_blueprint(SensorBlueprint)
+
+    mqtt_consumer = MQTTConsumer(sensor_service, operational_service, alert_service)
+    threading.Thread(target=mqtt_consumer.start, daemon=True).start()
 
     return app
 
